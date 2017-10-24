@@ -9,7 +9,7 @@ import java.util.Random;
 
 /**
  *
- * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
+ * @author Jonatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
  */
 public class RBF {
 
@@ -33,8 +33,8 @@ public class RBF {
     this.entradas = new double[NUM_ENTRADAS];
     this.variancia = new double[NUM_NEU_CAMADA_ESCONDIDA];
     this.pesosCamadaEscondida = new double[NUM_NEU_CAMADA_ESCONDIDA][NUM_ENTRADAS];
-    this.pesosCamadaSaida = new double[NUM_NEU_CAMADA_SAIDA][NUM_NEU_CAMADA_ESCONDIDA + 1];//+1 por causa do peso do limiar de ativação
-    this.saidaCamadaEscondida = new double[NUM_NEU_CAMADA_ESCONDIDA + 1];//+1 por causa do limiar de ativação
+    this.pesosCamadaSaida = new double[NUM_NEU_CAMADA_SAIDA][NUM_NEU_CAMADA_ESCONDIDA + 1];//+1 por causa do peso do limiar de ativacao
+    this.saidaCamadaEscondida = new double[NUM_NEU_CAMADA_ESCONDIDA + 1];//+1 por causa do limiar de ativacao
     this.saidaCamadaSaida = new double[NUM_NEU_CAMADA_SAIDA];
     this.saidasEsperadas = new double[NUM_NEU_CAMADA_SAIDA];
   }
@@ -49,7 +49,7 @@ public class RBF {
       return false;
     }
 
-    //Por ultimo realiza o treinamento da camada de saída
+    //Por ultimo realiza o treinamento da camada de saida
     if (treinarCamadaSaida(arquivoTreinamento) == false) {
       return false;
     }
@@ -74,10 +74,11 @@ public class RBF {
     arquivoTeste.abrirArquivo();
     numErros = 0;
 
+    //Para cada amostra do conjunto de teste
     for (String linha : arquivoTeste.getLinhasArquivo()) {
       recuperarEntradas(linha);
 
-      //Calculando saída da rede
+      //Calculando saida da rede
       calcularSaida();
 
       log1 = "";
@@ -85,10 +86,11 @@ public class RBF {
       log3 = "";
       errou = false;
       for (int neuronio = 0; neuronio < NUM_NEU_CAMADA_SAIDA; neuronio++) {
-        log1 += String.format("%g ", saidasEsperadas[neuronio]);
-        log2 += String.format("%g ", saidaCamadaSaida[neuronio]);
-        log3 += String.format("%g ", posProcessamento(saidaCamadaSaida[neuronio]));
+        log1 += String.format("%f ", saidasEsperadas[neuronio]);
+        log2 += String.format("%s ", Double.toString(saidaCamadaSaida[neuronio]));
+        log3 += String.format("%f ", posProcessamento(saidaCamadaSaida[neuronio]));
 
+        //Verifica se acertou ou errou a amostra
         if (posProcessamento(saidaCamadaSaida[neuronio]) != saidasEsperadas[neuronio]) {
           errou = true;
         }
@@ -116,7 +118,7 @@ public class RBF {
 
     Comunicador.addLog("Treinamento camada escondida");
 
-    //Iniciando o vetor que irá guardar os grupos omega
+    //Iniciando o vetor que ira guardar os grupos omega
     gruposOmega = new List[NUM_NEU_CAMADA_ESCONDIDA];
     for (int i = 0; i < NUM_NEU_CAMADA_ESCONDIDA; i++) {
       gruposOmega[i] = new ArrayList();
@@ -143,7 +145,7 @@ public class RBF {
           menorDistanciaEuclidiana = Double.MAX_VALUE;
           neuronioMenorDistanciaEuclidiana = 0;
 
-          //Calcula a distância euclidoana da entrada para cada neuronio
+          //Calcula a distancia euclidoana da entrada para cada neuronio
           for (int neuronio = 0; neuronio < NUM_NEU_CAMADA_ESCONDIDA; neuronio++) {
             distanciaEuclidiana = 0D;
 
@@ -153,18 +155,20 @@ public class RBF {
 
             distanciaEuclidiana = Math.sqrt(distanciaEuclidiana);
 
+            //Verifica qual a menor distancia euclidiana
             if (distanciaEuclidiana < menorDistanciaEuclidiana) {
               menorDistanciaEuclidiana = distanciaEuclidiana;
               neuronioMenorDistanciaEuclidiana = neuronio;
             }
           }
 
+          //Adiciona amostra no grupo omega do neuronio com menor distancia euclidiana
           if (adicionarNoGrupoOmega(indiceAmostra, neuronioMenorDistanciaEuclidiana, gruposOmega)) {
             mudouGrupoOmega = true;
           }
         }
 
-        //Ajustando os pesos
+        //Ajustando os pesos da camada escondida
         for (int neuronio = 0; neuronio < NUM_NEU_CAMADA_ESCONDIDA; neuronio++) {
           for (int peso = 0; peso < NUM_ENTRADAS; peso++) {
             valorParcial = 0D;
@@ -175,14 +179,14 @@ public class RBF {
               valorParcial += entradas[peso];
             }
 
-            if (!gruposOmega[neuronio].isEmpty()) {//Evita divisão por zero
+            if (!gruposOmega[neuronio].isEmpty()) {//Evita divisao por zero
               pesosCamadaEscondida[neuronio][peso] = (1D / (double) gruposOmega[neuronio].size()) * valorParcial;
             }
           }
         }
       } while (mudouGrupoOmega);
 
-      //Calculando variancia de cada função de ativação
+      //Calculando variancia de cada funcao de ativacao
       for (int neuronio = 0; neuronio < NUM_NEU_CAMADA_ESCONDIDA; neuronio++) {
         valorParcial = 0D;
 
@@ -217,7 +221,7 @@ public class RBF {
     numAmostra = 0;
     listaZ = new ArrayList<double[]>();
 
-    //Iniciando pesos da camada de saída com valores aleatórios enttre 0 e 1
+    //Iniciando pesos da camada de saida com valores aleatorios enttre 0 e 1
     random = new Random();
 
     for (int i = 0; i < NUM_NEU_CAMADA_SAIDA; i++) {
@@ -226,6 +230,7 @@ public class RBF {
       }
     }
 
+    //Calculando os valores dos vetores Z
     for (String linha : arquivoTreinamento.getLinhasArquivo()) {
       numAmostra++;
 
@@ -239,7 +244,7 @@ public class RBF {
       }
     }
 
-    //
+    //Para cada amostra do conjunto de treinamento calcula o gradiente e atualiza os pesos da camada de saida
     erroAtual = erroQuadraticoMedio(arquivoTreinamento);
     do {
       erroAnterior = erroAtual;
@@ -249,7 +254,7 @@ public class RBF {
         
         calcularSaida();
 
-        //Atualizando pesos sinapticos da camada de saída em função do valor do gradiente
+        //Atualizando pesos sinapticos da camada de saida em funcao do valor do gradiente
         for (int neuronio = 0; neuronio < NUM_NEU_CAMADA_SAIDA; neuronio++) {
           gradiente = saidasEsperadas[neuronio] - saidaCamadaSaida[neuronio];
 
@@ -282,7 +287,7 @@ public class RBF {
       saidaCamadaEscondida[neuronio+1] = Math.pow(Math.E, (-1D) * (valorParcial / (2D * variancia[neuronio])));
     }
 
-    //Calculando saida da camada de saída
+    //Calculando saida da camada de saida
     for (int neuronio = 0; neuronio < NUM_NEU_CAMADA_SAIDA; neuronio++) {
       valorParcial = 0D;
 
@@ -306,10 +311,12 @@ public class RBF {
       i++;
     }
 
+    //preenche o vetor de entradas a partir da linha lida do arquivo
     for (int j = 0; j < NUM_ENTRADAS; j++) {
       entradas[j] = Numero.parseDouble(vetor[i++]);
     }
 
+    //preenche o vetor das saidas esperadas a partir da linha lida do arquivo
     if (vetor.length > i) {
       for (int j = 0; i + j < vetor.length; j++) {
         saidasEsperadas[j] = Numero.parseDouble(vetor[i++]);
@@ -318,20 +325,21 @@ public class RBF {
   }
 
   private boolean adicionarNoGrupoOmega(int amostra, int neuronio, List[] gruposOmega) {
-    //Se a amostra já está no grupo não há  mudança
+    //Se a amostra ja esta no grupo nao ha  mudanca
     for (int indice = 0; indice < gruposOmega[neuronio].size(); indice++) {
       if ((int) gruposOmega[neuronio].get(indice) == amostra) {
         return false;
       }
     }
 
-    //Se a amostra está em outro grupo deve ser removida
+    //Se a amostra esta em outro grupo deve ser removida
     for (int i = 0; i < NUM_NEU_CAMADA_ESCONDIDA; i++) {
-      //Não olha no grupo onde deve ser adicionado
+      //Nao olha no grupo onde deve ser adicionado
       if (i == neuronio) {
         continue;
       }
 
+      //remove a amostra do grupo antigo
       for (int indice = 0; indice < gruposOmega[i].size(); indice++) {
         if ((int) gruposOmega[i].get(indice) == amostra) {
           gruposOmega[i].remove(indice);
@@ -354,12 +362,14 @@ public class RBF {
     erro = 0D;
     erroQuadMedio = 0D;
 
+    //Para cada amostra do conjunto de treinamento
     for (String linha : arquivoTreinamento.getLinhasArquivo()) {
       numAmostras++;
       recuperarEntradas(linha);
       calcularSaida();
       erro = 0D;
 
+      //O Erro e a soma dos erros de cada neuronio da camada de saida
       for (int neuronio = 0; neuronio < NUM_NEU_CAMADA_SAIDA; neuronio++) {
         erro += Math.pow(saidasEsperadas[neuronio] - saidaCamadaSaida[neuronio], 2D);
       }
@@ -368,11 +378,13 @@ public class RBF {
       erroQuadMedio += erro;
     }
 
+    //Calculando Eqm
     erroQuadMedio = erroQuadMedio / numAmostras;
 
     return erroQuadMedio;
   }
 
+  //Imprime os pesos sinapticos da camada escondida
   private void imprimirPesosCamadaEscondida() {
     String texto;
 
@@ -393,6 +405,7 @@ public class RBF {
     }
   }
 
+  //Imprime os pesos sinapticos da camada de saida
   private void imprimirPesosCamadaSaida() {
     String texto;
 
@@ -409,6 +422,7 @@ public class RBF {
     }
   }
 
+  //Realiza o pos processamento
   private double posProcessamento(double val) {
     if (val >= 0D) {
       return 1D;
